@@ -10,12 +10,14 @@ struct DecodedWord: Identifiable, Hashable {
 @MainActor @Observable
 final class AppModel {
     enum Screen: String, CaseIterable, Identifiable {
+        case whisper = "Whisper"
         case sensors = "Sensors"
         case train = "Train"
         case decode = "Decode"
         var id: String { rawValue }
         var symbol: String {
             switch self {
+            case .whisper: "waveform.and.mic"
             case .sensors: "waveform.path.ecg"
             case .train: "square.stack.3d.up"
             case .decode: "text.bubble"
@@ -29,8 +31,11 @@ final class AppModel {
     let capture = CaptureController()
     let recorder = SessionRecorder()
 
-    var screen: Screen = .train {
-        didSet { syncCaptureMode() }
+    var screen: Screen = .whisper {
+        didSet {
+            syncCaptureMode()
+            startMotionIfNeeded()
+        }
     }
 
     // MARK: Training
@@ -57,6 +62,7 @@ final class AppModel {
 
     @ObservationIgnored private var keyMonitor: Any?
     @ObservationIgnored private var started = false
+    @ObservationIgnored private var motionStarted = false
 
     init() {
         selectedWord = dataset.vocabulary.first
@@ -68,9 +74,15 @@ final class AppModel {
         started = true
         motion.onSample = { [weak self] sample in self?.ingest(sample) }
         capture.onSegment = { [weak self] segment in self?.handleSegment(segment) }
-        motion.start()
         audio.refreshDevices()
         installKeyMonitor()
+        startMotionIfNeeded()
+    }
+
+    private func startMotionIfNeeded() {
+        guard started, screen != .whisper, !motionStarted else { return }
+        motionStarted = true
+        motion.start()
     }
 
     private func ingest(_ sample: MotionSample) {
@@ -85,6 +97,8 @@ final class AppModel {
     private func handleSegment(_ segment: [MotionSample]) {
         lastSegment = segment
         switch screen {
+        case .whisper:
+            return
         case .train:
             guard let word = selectedWord else { return }
             addTemplate(Template(label: word, samples: segment))
@@ -124,6 +138,7 @@ final class AppModel {
         // Let text fields keep the space bar.
         if NSApp.keyWindow?.firstResponder is NSText { return false }
         switch screen {
+        case .whisper: return false
         case .train: return selectedWord != nil
         case .decode: return decodeMode == .hold && classifier != nil
         case .sensors: return recorder.isRecording

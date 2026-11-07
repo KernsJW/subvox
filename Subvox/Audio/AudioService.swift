@@ -53,7 +53,9 @@ final class AudioService {
     /// `nil` means "system default input".
     var selectedDeviceID: AudioDeviceID? {
         didSet {
-            guard oldValue != selectedDeviceID, isRunning else { return }
+            guard oldValue != selectedDeviceID else { return }
+            hasAutoSelectedWhisperInput = true
+            guard isRunning else { return }
             stop()
             Task { await start() }
         }
@@ -61,9 +63,16 @@ final class AudioService {
 
     @ObservationIgnored let sink = AudioSink()
     @ObservationIgnored private var engine: AVAudioEngine?
+    @ObservationIgnored private var hasAutoSelectedWhisperInput = false
 
     func refreshDevices() {
         devices = AudioDevices.inputDevices()
+        if !hasAutoSelectedWhisperInput,
+           let preferred = AudioDevices.preferredWhisperInput(in: devices)
+        {
+            hasAutoSelectedWhisperInput = true
+            selectedDeviceID = preferred.id
+        }
     }
 
     func start() async {

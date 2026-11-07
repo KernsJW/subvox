@@ -1,7 +1,7 @@
 import CoreMotion
 import Observation
 
-/// Streams `CMHeadphoneMotionManager` updates from connected AirPods.
+/// Streams `CMHeadphoneMotionManager` updates from motion-capable headphones.
 @MainActor @Observable
 final class HeadphoneMotionService {
     enum Status: Equatable {
@@ -13,9 +13,9 @@ final class HeadphoneMotionService {
 
         var label: String {
             switch self {
-            case .unsupported: "Headphone motion unsupported"
+            case .unsupported: "No headphone-motion sensor available"
             case .denied: "Motion access denied"
-            case .waiting: "Waiting for AirPods"
+            case .waiting: "Waiting for motion-capable headphones"
             case .streaming: "Streaming"
             case .error(let message): message
             }

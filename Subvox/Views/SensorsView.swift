@@ -35,7 +35,7 @@ struct SensorsView: View {
 
     private var motionCard: some View {
         let motion = model.motion
-        return GroupBox("AirPods motion") {
+        return GroupBox("Headphone motion") {
             VStack(alignment: .leading, spacing: 8) {
                 LabeledContent("Status", value: motion.status.label)
                 LabeledContent("Sample rate", value: String(format: "%.1f Hz", motion.sampleRate))
@@ -44,7 +44,7 @@ struct SensorsView: View {
                     LabeledContent("Gravity", value: String(format: "%.2f, %.2f, %.2f", s.gx, s.gy, s.gz))
                 }
                 if motion.status == .waiting {
-                    Text("Put in AirPods Pro and make sure they're the active output on this Mac.")
+                    Text("Connect headphones with dynamic head tracking, such as AirPods Pro, and make them the active output on this Mac.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -83,7 +83,7 @@ private struct MicrophoneCard: View {
                 if let error = audio.error ?? model.transcriber.error {
                     Text(error).font(.caption).foregroundStyle(.red)
                 }
-                Text("Selecting AirPods as input switches them to the Bluetooth headset profile, which can lower playback quality.")
+                Text("Selecting a Bluetooth headset microphone switches it to the call-quality HFP profile, which can lower playback quality.")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }

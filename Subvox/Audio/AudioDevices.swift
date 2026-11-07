@@ -24,6 +24,27 @@ enum AudioDevices {
         }
     }
 
+    /// Prefers the user's bone-conduction headset as a microphone. The match is
+    /// intentionally name-based because Core Audio does not expose Bluetooth
+    /// marketing model identifiers through this device list.
+    static func preferredWhisperInput(in devices: [Device]) -> Device? {
+        devices
+            .filter { whisperInputScore(for: $0.name) > 0 }
+            .max { whisperInputScore(for: $0.name) < whisperInputScore(for: $1.name) }
+    }
+
+    static func isWhisperHeadsetName(_ name: String) -> Bool {
+        whisperInputScore(for: name) > 0
+    }
+
+    private static func whisperInputScore(for name: String) -> Int {
+        let normalized = name.lowercased()
+        if normalized.contains("aeropex") { return 3 }
+        if normalized.contains("aftershokz") { return 2 }
+        if normalized.contains("shokz") { return 1 }
+        return 0
+    }
+
     static func defaultInputID() -> AudioDeviceID? {
         var address = AudioObjectPropertyAddress(
             mSelector: kAudioHardwarePropertyDefaultInputDevice,

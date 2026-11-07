@@ -11,17 +11,20 @@ struct ContentView: View {
             .navigationSplitViewColumnWidth(min: 160, ideal: 180)
         } detail: {
             switch model.screen {
+            case .whisper: WhisperView()
             case .sensors: SensorsView()
             case .train: TrainView()
             case .decode: DecodeView()
             }
         }
         .toolbar {
-            ToolbarItem(placement: .status) {
-                MotionStatusBadge(status: model.motion.status, rate: model.motion.sampleRate)
-            }
-            ToolbarItem {
-                RecordToolbarButton()
+            if model.screen != .whisper {
+                ToolbarItem(placement: .status) {
+                    MotionStatusBadge(status: model.motion.status, rate: model.motion.sampleRate)
+                }
+                ToolbarItem {
+                    RecordToolbarButton()
+                }
             }
         }
         .navigationTitle(model.screen.rawValue)
