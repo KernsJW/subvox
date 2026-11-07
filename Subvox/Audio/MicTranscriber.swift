@@ -2,8 +2,8 @@ import AVFoundation
 import Observation
 import Speech
 
-/// Continuous speech-to-text from the microphone. Used both for whisper dictation and
-/// as the reference ("ground truth") next to the motion decoder.
+/// Continuous speech-to-text from the microphone. Used as the reference ("ground truth")
+/// next to the motion decoder, and to test whether whispering is enough for input.
 @MainActor @Observable
 final class MicTranscriber {
     private(set) var isRunning = false

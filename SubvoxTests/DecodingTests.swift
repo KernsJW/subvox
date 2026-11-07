@@ -65,17 +65,4 @@ final class DecodingTests: XCTestCase {
         XCTAssertLessThan(trimmed.count, 40)
         XCTAssertGreaterThanOrEqual(trimmed.count, 20)
     }
-
-    func testAeropexIsPreferredWhisperInput() throws {
-        let devices = [
-            AudioDevices.Device(id: 1, name: "MacBook Pro Microphone"),
-            AudioDevices.Device(id: 2, name: "Shokz OpenRun"),
-            AudioDevices.Device(id: 3, name: "Aeropex by AfterShokz"),
-        ]
-
-        let preferred = try XCTUnwrap(AudioDevices.preferredWhisperInput(in: devices))
-        XCTAssertEqual(preferred.id, 3)
-        XCTAssertTrue(AudioDevices.isWhisperHeadsetName(preferred.name))
-        XCTAssertFalse(AudioDevices.isWhisperHeadsetName("MacBook Pro Microphone"))
-    }
 }

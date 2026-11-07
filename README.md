@@ -1,8 +1,8 @@
 # Subvox
 
-A macOS whisper-dictation app and research prototype. It can turn quiet speech from an Aeropex/AfterShokz/Shokz microphone into text, and separately tests whether compatible headphone-motion data (`CMHeadphoneMotionManager`) can turn **silently mouthed words into text**.
+A macOS prototype that tests whether AirPods Pro head-motion data (`CMHeadphoneMotionManager`) carries enough information to turn **silently mouthed words into text**.
 
-The experimental motion decoder does not use a language model. It is a small-vocabulary template recognizer plus a statistical test that tells you whether the signal is real. Whisper mode uses Apple's Speech framework.
+It doesn't use a language model. It's a small-vocabulary template recognizer plus a statistical test that tells you whether the signal is real.
 
 ## Build & run
 
@@ -20,22 +20,12 @@ open build/Build/Products/Debug/Subvox.app
 xcodebuild -project Subvox.xcodeproj -scheme Subvox -derivedDataPath build test
 ```
 
-Requires macOS 14+. Whisper mode works with Aeropex or any Mac microphone; pair the headset in Bluetooth settings before launching, then grant **Microphone** and **Speech Recognition** when prompted. The experimental motion screens require AirPods Pro or another headphone with dynamic head tracking and request **Motion** only when you open one of those screens.
-
-## Aeropex whisper mode
-
-1. Pair **Aeropex by AfterShokz** in macOS Bluetooth settings.
-2. Open **Whisper**. Subvox automatically prefers an input whose name contains Aeropex, AfterShokz, or Shokz.
-3. Choose **Start Whispering** and speak quietly. The live meter confirms that the microphone is receiving audio.
-4. Copy the resulting transcript when finished.
-
-Aeropex uses bone conduction for speaker output, but its exposed input is a conventional Bluetooth headset microphone. It does not expose jaw-vibration or head-motion sensor data to macOS, so it can transcribe an audible whisper but cannot decode silent mouthing. Using its microphone also switches Bluetooth audio to the call-quality HFP profile.
+Requires macOS 14+, AirPods Pro or another headphone that supports head tracking, connected as the Mac's audio output. On first launch, grant **Motion**. The mic and speech prompts only appear when you start the mic.
 
 ## Screens
 
 | Screen | What it does |
 |---|---|
-| **Whisper** | Transcribes quiet speech from Aeropex or another selected microphone. No motion sensor or training required. |
 | **Sensors** | Live plots of user acceleration, rotation rate and attitude, the measured sample rate, a mic input picker and level meter, and a recorder for experiment sessions. |
 | **Train** | Pick a word, hold **Space**, mouth it, release. Each take is stored as a template. **Evaluate** runs leave-one-out classification and a 500× label-permutation test, then shows accuracy against chance, a p-value and a confusion matrix. The feature checkboxes (acceleration / rotation / attitude) let you test which channels carry the signal. |
 | **Decode** | The motion-to-text screen. Hold Space, or use auto-detect after calibrating the noise floor. Each segment is DTW-matched against your templates and added to the transcript. A live mic transcript runs alongside it for comparison. |
@@ -64,5 +54,4 @@ The training set lives at `~/Library/Application Support/Subvox/dataset.json`.
 
 - Headphone motion is processed and low-rate (roughly 25 Hz on AirPods). The speech-detecting accelerometer and the inward mic are not exposed. Expect jaw and head movement, not vocal vibration.
 - Templates are user- and session-specific. Re-seating the AirPods can shift the signal.
-- Choosing any Bluetooth headset as the mic input switches it to the Bluetooth headset (HFP) profile.
-- Aeropex is supported for audible whisper transcription only; it does not provide the motion stream used by Train and Decode.
+- Choosing AirPods as the mic input switches them to the Bluetooth headset (HFP) profile.

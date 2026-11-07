@@ -23,10 +23,10 @@
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.developer-tools</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Subvox uses your selected microphone for whisper dictation and optional experiment recording.</string>
+	<string>Subvox records microphone audio alongside motion data and transcribes whispered speech for comparison.</string>
 	<key>NSMotionUsageDescription</key>
-	<string>Subvox reads compatible headphone-motion data to study whether mouthed words can be decoded into text.</string>
+	<string>Subvox reads AirPods head-motion data to study whether mouthed words can be decoded into text.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Subvox turns quiet speech from your selected microphone into text.</string>
+	<string>Subvox transcribes microphone audio on-device as a reference for the motion decoder.</string>
 </dict>
 </plist>

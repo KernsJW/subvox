@@ -21,9 +21,9 @@ targets:
       properties:
         CFBundleDisplayName: Subvox
         LSApplicationCategoryType: public.app-category.developer-tools
-        NSMotionUsageDescription: Subvox reads compatible headphone-motion data to study whether mouthed words can be decoded into text.
-        NSMicrophoneUsageDescription: Subvox uses your selected microphone for whisper dictation and optional experiment recording.
-        NSSpeechRecognitionUsageDescription: Subvox turns quiet speech from your selected microphone into text.
+        NSMotionUsageDescription: Subvox reads AirPods head-motion data to study whether mouthed words can be decoded into text.
+        NSMicrophoneUsageDescription: Subvox records microphone audio alongside motion data and transcribes whispered speech for comparison.
+        NSSpeechRecognitionUsageDescription: Subvox transcribes microphone audio on-device as a reference for the motion decoder.
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.joeblau.subvox
