@@ -1,3 +1,17 @@
+# .NET build output
+**/bin/
+**/obj/
+
+# Local model and recording artifacts
+*.partial
+*.wav
+
+# Visual Studio user state
+.vs/
+*.user
+*.suo
+
+# Original macOS prototype output
 *.xcodeproj
 build/
 DerivedData/

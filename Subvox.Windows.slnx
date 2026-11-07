@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Subvox.Windows/Subvox.Windows.csproj" />
+  <Project Path="Subvox.Windows.Tests/Subvox.Windows.Tests.csproj" />
+</Solution>
