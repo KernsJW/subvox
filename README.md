@@ -1,57 +1,52 @@
 # Subvox
 
-A macOS prototype that tests whether AirPods Pro head-motion data (`CMHeadphoneMotionManager`) carries enough information to turn **silently mouthed words into text**.
+Subvox is a Windows whisper-dictation app designed around an Aeropex/AfterShokz/Shokz headset. It automatically prefers the headset microphone, shows the live input level, records a short quiet passage, and transcribes it locally with Whisper.
 
-It doesn't use a language model. It's a small-vocabulary template recognizer plus a statistical test that tells you whether the signal is real.
+The Aeropex transducers use bone conduction for **playback**. Its Windows microphone is still a conventional Bluetooth headset microphone, so Subvox can recognize an audible whisper but cannot decode completely silent mouthing or read jaw vibrations.
 
-## Build & run
+## Windows build and run
 
-```sh
-brew install xcodegen   # once
-xcodegen generate
-open Subvox.xcodeproj   # ⌘R
+Requirements:
+
+- Windows 11
+- .NET 10 SDK for building (`dotnet --version`)
+- Aeropex paired in **Settings → Bluetooth & devices** and allowed as a microphone
+- Microsoft Visual C++ 2022 Redistributable, required by the Whisper CPU runtime
+
+From PowerShell:
+
+```powershell
+dotnet restore .\Subvox.Windows.slnx
+dotnet build .\Subvox.Windows.slnx --no-restore
+dotnet run --project .\Subvox.Windows\Subvox.Windows.csproj
 ```
 
-Or from the command line:
+On first launch, choose **Download local model**. Subvox downloads Whisper `base.en` (about 142 MB) to `%LOCALAPPDATA%\Subvox\models`. Recording and transcription then remain on the PC. Temporary WAV files are removed after each transcription or normal app close.
 
-```sh
-xcodebuild -project Subvox.xcodeproj -scheme Subvox -derivedDataPath build -allowProvisioningUpdates build
-open build/Build/Products/Debug/Subvox.app
-xcodebuild -project Subvox.xcodeproj -scheme Subvox -derivedDataPath build test
+## Using Aeropex whisper mode
+
+1. Pair Aeropex in Windows and confirm its headset microphone is available.
+2. Launch Subvox. It prefers device names containing `Aeropex`, `AfterShokz`, or `Shokz`.
+3. Download the local model once.
+4. Select **Start whispering** or press **F8**, speak quietly, then press F8 again.
+5. Review, edit, or copy the transcript.
+
+Selecting a Bluetooth headset microphone switches the headset into the lower-bandwidth HFP call profile while recording. That is expected Bluetooth behavior.
+
+## Local checks
+
+```powershell
+dotnet build .\Subvox.Windows.slnx
+dotnet run --project .\Subvox.Windows.Tests\Subvox.Windows.Tests.csproj
 ```
 
-Requires macOS 14+, AirPods Pro or another headphone that supports head tracking, connected as the Mac's audio output. On first launch, grant **Motion**. The mic and speech prompts only appear when you start the mic.
+The deterministic checks cover Aeropex/Shokz microphone preference and fallback selection. Physical headset capture and quiet-speech accuracy still require owner UAT with the actual Aeropex.
 
-## Screens
+## Repository layout
 
-| Screen | What it does |
-|---|---|
-| **Sensors** | Live plots of user acceleration, rotation rate and attitude, the measured sample rate, a mic input picker and level meter, and a recorder for experiment sessions. |
-| **Train** | Pick a word, hold **Space**, mouth it, release. Each take is stored as a template. **Evaluate** runs leave-one-out classification and a 500× label-permutation test, then shows accuracy against chance, a p-value and a confusion matrix. The feature checkboxes (acceleration / rotation / attitude) let you test which channels carry the signal. |
-| **Decode** | The motion-to-text screen. Hold Space, or use auto-detect after calibrating the noise floor. Each segment is DTW-matched against your templates and added to the transcript. A live mic transcript runs alongside it for comparison. |
+- `Subvox.Windows/` — current Windows WPF application.
+- `Subvox.Windows.Tests/` — dependency-free Windows verification runner.
+- `docs/windows-ui-brief.md` — UI references, states, and hardware boundary.
+- `Subvox/`, `SubvoxTests/`, `project.yml` — the original macOS headphone-motion research prototype retained for reference.
 
-## How decoding works
-
-1. **Segmentation** (`CaptureController`). Space-hold, or an energy trigger above a calibrated noise floor with pre-roll and hangover.
-2. **Features** (`MotionFeatures`). Per frame: user acceleration (3), rotation rate (3), and attitude change since the start of the segment (3). Each channel is mean-centered, and quiet lead-in and lead-out frames are trimmed.
-3. **Matching** (`DTW`, `TemplateClassifier`). Each channel is z-scaled across the training set. Matching is 1-nearest-neighbour per word, using dynamic time warping with a Sakoe–Chiba band. A segment is rejected if the best distance is above *max distance* or the margin to the runner-up is below *min confidence*.
-4. **Is it real?** (`Evaluation`). The leave-one-out accuracy is compared with the same procedure run on shuffled labels. If p < 0.05, the motion stream distinguishes your words better than chance.
-
-## Experiment protocol
-
-Use **Record Session** in the toolbar or on the Sensors screen. Recordings go to `~/Documents/Subvox/Sessions/<timestamp>-<condition>/`:
-
-- `motion.csv`: every motion sample. `t` is seconds from session start.
-- `audio.caf`: microphone audio, if the mic is running.
-- `events.csv`: every Space-held segment, with its label or prediction.
-- `meta.json`: condition, prompt, and the audio start offset for aligning audio with motion.
-
-Suggested runs: the same 5-word script under **Normal speech**, **Whisper** and **Silent mouthing**, 10 reps each. Then, in Train, compare the Evaluate results across feature sets.
-
-The training set lives at `~/Library/Application Support/Subvox/dataset.json`.
-
-## Known limits
-
-- Headphone motion is processed and low-rate (roughly 25 Hz on AirPods). The speech-detecting accelerometer and the inward mic are not exposed. Expect jaw and head movement, not vocal vibration.
-- Templates are user- and session-specific. Re-seating the AirPods can shift the signal.
-- Choosing AirPods as the mic input switches them to the Bluetooth headset (HFP) profile.
+The macOS experiment tests motion-template classification with supported Apple headphones. It is separate from Windows Aeropex whisper dictation and is not required to build or run the Windows app.
